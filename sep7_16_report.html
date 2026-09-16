@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Amber Community — Weekly Report</title>
+<style>
+  :root{
+    --red:#E10600; --red-dark:#A80500; --ink:#1A1A1A; --paper:#FAF9F7;
+    --line:#EAE6E1; --muted:#6B6560; --good:#1E7A4A; --warn:#B8860B; --bad:#C0392B;
+  }
+  *{box-sizing:border-box;}
+  body{margin:0;font-family:'Helvetica Neue',Arial,sans-serif;background:var(--paper);color:var(--ink);}
+  .topbar{background:var(--ink);color:#fff;padding:18px 28px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50;flex-wrap:wrap;gap:10px;}
+  .brand{display:flex;align-items:baseline;gap:10px;}
+  .brand .mark{color:var(--red);font-weight:800;font-size:20px;letter-spacing:0.5px;}
+  .brand .sub{font-size:12px;color:#B8B4AF;letter-spacing:1px;text-transform:uppercase;}
+  .nav{display:flex;gap:4px;background:#2A2A2A;border-radius:8px;padding:4px;flex-wrap:wrap;}
+  .nav button{border:none;background:transparent;color:#C9C5C0;padding:8px 16px;border-radius:6px;font-size:13px;font-weight:600;cursor:pointer;transition:.15s;}
+  .nav button.active{background:var(--red);color:#fff;}
+  .page{display:none;padding:36px 40px 60px;max-width:1180px;margin:0 auto;animation:fade .3s ease;}
+  .page.active{display:block;}
+  @keyframes fade{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+  .hero{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:28px;border-bottom:3px solid var(--ink);padding-bottom:18px;flex-wrap:wrap;gap:10px;}
+  .hero h1{font-size:30px;margin:0 0 4px;letter-spacing:-0.5px;}
+  .hero .range{color:var(--muted);font-size:14px;}
+
+  .stat-row{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:30px;}
+  .stat{background:#fff;border:1px solid var(--line);border-top:4px solid var(--red);border-radius:6px;padding:18px 18px 14px;}
+  .stat .num{font-size:28px;font-weight:800;color:var(--ink);}
+  .stat .lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:0.6px;margin-top:2px;}
+
+  .section-title{font-size:14px;text-transform:uppercase;letter-spacing:1px;color:var(--red-dark);font-weight:700;margin:34px 0 14px;border-left:4px solid var(--red);padding-left:10px;}
+
+  .panel{background:#fff;border:1px solid var(--line);border-radius:8px;padding:22px;}
+
+  .bars{display:flex;flex-direction:column;gap:12px;}
+  .bar-row{display:grid;grid-template-columns:130px 1fr 60px;align-items:center;gap:10px;font-size:13px;}
+  .bar-track{background:#F0EDE9;border-radius:4px;height:20px;overflow:hidden;}
+  .bar-fill{height:100%;background:linear-gradient(90deg,var(--red-dark),var(--red));border-radius:4px 0 0 4px;}
+  .bar-fill.grey{background:linear-gradient(90deg,#9a9691,#c9c5c0);}
+  .bar-num{font-weight:700;text-align:right;}
+
+  .two-col{display:grid;grid-template-columns:1.3fr 1fr;gap:20px;}
+
+  .callout{border:1px solid #F0D9A8;background:#FFF8E8;border-left:4px solid var(--warn);border-radius:6px;padding:16px 18px;margin:16px 0;font-size:13.5px;line-height:1.55;}
+  .callout.good{border-color:#BFE3CC;background:#F0FAF3;border-left-color:var(--good);}
+  .callout.urgent{border-color:#F0B0A8;background:#FFF1EF;border-left-color:var(--bad);}
+  .callout b{color:var(--ink);}
+  .callout .tag{display:inline-block;font-size:10px;font-weight:800;letter-spacing:0.5px;text-transform:uppercase;background:var(--warn);color:#fff;padding:2px 7px;border-radius:3px;margin-right:8px;}
+  .callout.good .tag{background:var(--good);}
+  .callout.urgent .tag{background:var(--bad);}
+
+  .grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:14px;margin-bottom:8px;}
+  .country-card{background:#fff;border:1px solid var(--line);border-radius:8px;padding:16px;}
+  .country-card h3{margin:0 0 2px;font-size:16px;}
+  .country-card .flag{font-size:22px;}
+  .health{display:inline-block;font-size:10.5px;font-weight:800;letter-spacing:0.4px;padding:2px 8px;border-radius:10px;margin:6px 0 10px;text-transform:uppercase;}
+  .health.hot{background:#FDE7E5;color:var(--bad);}
+  .health.quiet{background:#EDEDED;color:var(--muted);}
+  .health.ok{background:#E6F2EA;color:var(--good);}
+  .kv{font-size:12.5px;display:flex;justify-content:space-between;padding:3px 0;border-bottom:1px dashed var(--line);}
+  .kv:last-child{border-bottom:none;}
+  .kv span:last-child{font-weight:700;}
+  .top-name{font-size:11.5px;color:var(--muted);margin-top:8px;line-height:1.6;}
+
+  .topic-pills{display:flex;flex-wrap:wrap;gap:8px;}
+  .topic-pill{background:#FFF3F2;border:1px solid #F5D6D3;color:var(--red-dark);font-size:12.5px;font-weight:600;padding:6px 14px;border-radius:20px;}
+
+  .grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+  .mini-table{width:100%;border-collapse:collapse;font-size:12.5px;}
+  .mini-table th{text-align:left;color:var(--muted);font-weight:700;text-transform:uppercase;font-size:10.5px;letter-spacing:0.4px;padding-bottom:6px;border-bottom:1px solid var(--line);}
+  .mini-table td{padding:5px 0;border-bottom:1px dashed var(--line);}
+  .mini-table tr:last-child td{border-bottom:none;}
+  .mini-table td:last-child{text-align:right;font-weight:700;}
+
+  .mc-table{width:100%;border-collapse:collapse;font-size:13px;}
+  .mc-table th{text-align:left;color:var(--muted);font-weight:700;text-transform:uppercase;font-size:10.5px;letter-spacing:0.4px;padding:0 0 8px;border-bottom:1px solid var(--line);}
+  .mc-table td{padding:10px 0;border-bottom:1px dashed var(--line);}
+  .mc-table tr:last-child td{border-bottom:none;font-weight:800;}
+  .mc-table td.num{text-align:right;font-weight:700;}
+  .mc-table td.delta-pos{text-align:right;font-weight:800;color:var(--good);}
+  .mc-table td.delta-neg{text-align:right;font-weight:800;color:var(--bad);}
+  .mc-table td.delta-na{text-align:right;font-weight:700;color:var(--muted);}
+
+  footer{text-align:center;color:var(--muted);font-size:11.5px;padding:30px 0 10px;}
+
+  @media(max-width:900px){
+    .stat-row{grid-template-columns:repeat(2,1fr);}
+    .grid5{grid-template-columns:repeat(2,1fr);}
+    .two-col{grid-template-columns:1fr;}
+    .grid2{grid-template-columns:1fr;}
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="brand"><span class="mark">amber</span><span class="sub">Global Aspirants Communities</span></div>
+  <div class="nav">
+    <button class="active" onclick="showPage(0,this)">Overview</button>
+    <button onclick="showPage(1,this)">Community #1</button>
+    <button onclick="showPage(2,this)">Community #2</button>
+    <button onclick="showPage(3,this)">Community #3</button>
+    <button onclick="showPage(4,this)">Community #4</button>
+  </div>
+</div>
+
+<!-- PAGE 0: OVERVIEW -->
+<div class="page active" id="page-0">
+  <div class="hero">
+    <div>
+      <h1>Weekly Community Report</h1>
+      <div class="range">7 – 16 September 2026</div>
+    </div>
+  </div>
+
+  <div class="section-title">Member Count — vs Last Wednesday's Report</div>
+  <div class="panel">
+    <table class="mc-table">
+      <tr><th>Community</th><th style="text-align:right;">Last Wed (7 Sep)</th><th style="text-align:right;">Today (16 Sep)</th><th style="text-align:right;">Change</th></tr>
+      <tr><td>Community #1</td><td class="num">1,868</td><td class="num">1,831</td><td class="delta-neg">−37</td></tr>
+      <tr><td>Community #2</td><td class="num">1,670</td><td class="num">1,623</td><td class="delta-neg">−47</td></tr>
+      <tr><td>Community #3</td><td class="num">1,984</td><td class="num">1,940</td><td class="delta-neg">−44</td></tr>
+      <tr><td>Community #4 <span style="font-weight:400;color:var(--muted);">(new)</span></td><td class="delta-na">—</td><td class="num">356</td><td class="delta-na">new</td></tr>
+      <tr><td>Total</td><td class="num">5,522</td><td class="num">5,750</td><td class="delta-pos">+228 (+4.13%)</td></tr>
+    </table>
+    <p style="font-size:12.5px;color:var(--muted);line-height:1.6;margin:14px 0 0;">
+      Note: the headline total is up, but that's entirely Community #4 (created from scratch this period, 356 members). All three existing communities <b style="color:var(--ink);">lost members</b> for the first time simultaneously — excluding #4, the combined total actually fell −128 (−2.32%).
+    </p>
+  </div>
+
+  <div class="callout urgent">
+    <span class="tag">All 3 existing communities declined</span>
+    Community #1 (−37), #2 (−47), and #3 (−44) all shrank this period — including #3, which had been growing every single report until now. Worth checking whether this coincides with anything (invite links redirected to the new Community #4, admin settings changed, etc.).
+  </div>
+
+  <div class="section-title">Messages This Week, by Community</div>
+  <div class="panel">
+    <div class="bars">
+      <div class="bar-row"><div>Community #3</div><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><div class="bar-num">678</div></div>
+      <div class="bar-row"><div>Community #4</div><div class="bar-track"><div class="bar-fill grey" style="width:69%"></div></div><div class="bar-num">470</div></div>
+      <div class="bar-row"><div>Community #2</div><div class="bar-track"><div class="bar-fill grey" style="width:13%"></div></div><div class="bar-num">85</div></div>
+      <div class="bar-row"><div>Community #1</div><div class="bar-track"><div class="bar-fill grey" style="width:6%"></div></div><div class="bar-num">43</div></div>
+    </div>
+  </div>
+
+  <div class="section-title">Short.io &amp; GA4 Snapshot</div>
+  <div class="panel">
+    <div class="grid2">
+      <div>
+        <p style="font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 8px;">Short.io — 16 Aug to 16 Sep</p>
+        <table class="mini-table">
+          <tr><th>Metric</th><th>Value</th></tr>
+          <tr><td>Total clicks</td><td>2,663</td></tr>
+          <tr><td>Human clicks</td><td>1,995</td></tr>
+          <tr><td>Top country: India</td><td>577</td></tr>
+          <tr><td>Top country: Pakistan</td><td>458</td></tr>
+        </table>
+        <p style="font-size:10.5px;font-weight:700;color:var(--red-dark);text-transform:uppercase;letter-spacing:0.4px;margin:14px 0 6px;">Inbound (scholarship links)</p>
+        <table class="mini-table">
+          <tr><th>Link</th><th>Clicks</th></tr>
+          <tr><td>/scholarship-teamC</td><td>1,375</td></tr>
+          <tr><td>/community-D <span style="font-weight:400;color:var(--muted);">(new — Community #4)</span></td><td>396</td></tr>
+          <tr><td>/scholarship-teamB</td><td>30</td></tr>
+          <tr><td>/COMMUNITY_4D <span style="font-weight:400;color:var(--muted);">(new — Community #4)</span></td><td>4</td></tr>
+        </table>
+        <p style="font-size:10.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.4px;margin:14px 0 6px;">Outbound (travel deals)</p>
+        <table class="mini-table">
+          <tr><th>Link</th><th>Clicks</th></tr>
+          <tr><td>/traveldeals</td><td>128</td></tr>
+        </table>
+      </div>
+      <div>
+        <p style="font-size:11.5px;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:0.5px;margin:0 0 8px;">GA4 — 19 Aug to 15 Sep</p>
+        <table class="mini-table">
+          <tr><th>Metric</th><th>Value</th></tr>
+          <tr><td>Active users</td><td>531</td></tr>
+          <tr><td>New users</td><td>521</td></tr>
+          <tr><td>Avg. engagement time</td><td>~68s</td></tr>
+          <tr><td>Event count</td><td>2,864</td></tr>
+          <tr><td>Top source: Instagram/social</td><td>470 users</td></tr>
+          <tr><td>Top source: WhatsApp/referral</td><td>33 users</td></tr>
+        </table>
+      </div>
+    </div>
+    <div class="callout good" style="margin-top:16px;">
+      <span class="tag">Clicks recovered</span>
+      The steep drop flagged last report has reversed. Clicks bottomed out at 0–11/day around <b>7–10 Sep</b>, then recovered sharply to <b>67, 57, 106, 99, 69 clicks/day (11–15 Sep)</b> — timing that lines up closely with Community #4's creation (6 Sep) and its new dedicated links (/community-D, /COMMUNITY_4D) going live.
+    </div>
+  </div>
+
+  <div class="section-title">Headline Takeaways</div>
+  <div class="callout good">
+    <span class="tag">New community launched</span>
+    <b>Community #4</b> went from 0 to 356 members and 470 messages in just 10 days — already more active than Communities #1 and #2 combined, with genuinely on-topic conversation (scholarship questions, university comparisons, peer introductions).
+  </div>
+  <div class="callout">
+    <span class="tag">Most active</span>
+    <b>Community #3</b> remained the busiest overall (678 messages) despite losing members for the first time — UK (199) and Australia (238) carried most of the volume.
+  </div>
+
+  <footer>Amber Community · Internal weekly report · Data source: WhatsApp chat exports, 7 – 16 Sep 2026</footer>
+</div>
+
+<!-- PAGE 1: COMMUNITY #1 -->
+<div class="page" id="page-1">
+  <div class="hero">
+    <div>
+      <h1>Community #1 — Breakdown</h1>
+      <div class="range">7 – 16 September 2026 · 1,831 members</div>
+    </div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat"><div class="num">43</div><div class="lbl">Messages this period</div></div>
+    <div class="stat"><div class="num">18</div><div class="lbl">Unique active chatters</div></div>
+    <div class="stat"><div class="num">26</div><div class="lbl">Most active group: USA</div></div>
+    <div class="stat"><div class="num">0</div><div class="lbl">Silent groups: Australia / Germany</div></div>
+  </div>
+
+  <div class="section-title">Messages by Group</div>
+  <div class="panel">
+    <div class="bars">
+      <div class="bar-row"><div>🇺🇸 USA</div><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><div class="bar-num">26</div></div>
+      <div class="bar-row"><div>🇨🇦 Canada</div><div class="bar-track"><div class="bar-fill grey" style="width:35%"></div></div><div class="bar-num">9</div></div>
+      <div class="bar-row"><div>🇬🇧 UK</div><div class="bar-track"><div class="bar-fill grey" style="width:31%"></div></div><div class="bar-num">8</div></div>
+      <div class="bar-row"><div>🇦🇺 Australia</div><div class="bar-track"><div class="bar-fill grey" style="width:0%"></div></div><div class="bar-num">0</div></div>
+      <div class="bar-row"><div>🇩🇪 Germany</div><div class="bar-track"><div class="bar-fill grey" style="width:0%"></div></div><div class="bar-num">0</div></div>
+    </div>
+  </div>
+
+  <div class="section-title">Group Snapshots</div>
+  <div class="grid5">
+    <div class="country-card">
+      <div class="flag">🇦🇺</div><h3>Australia</h3>
+      <div class="health quiet">Silent</div>
+      <div class="kv"><span>Messages</span><span>0</span></div>
+      <div class="kv"><span>Active chatters</span><span>0</span></div>
+      <div class="top-name">No messages this period.</div>
+    </div>
+    <div class="country-card">
+      <div class="flag">🇨🇦</div><h3>Canada</h3>
+      <div class="health ok">On-topic</div>
+      <div class="kv"><span>Messages</span><span>9</span></div>
+      <div class="kv"><span>Active chatters</span><span>8</span></div>
+      <div class="top-name">Members asking how NICKOS got a St. Thomas scholarship; Canada visa prep questions.</div>
+    </div>
+    <div class="country-card">
+      <div class="flag">🇩🇪</div><h3>Germany</h3>
+      <div class="health quiet">Silent</div>
+      <div class="kv"><span>Messages</span><span>0</span></div>
+      <div class="kv"><span>Active chatters</span><span>0</span></div>
+      <div class="top-name">No messages this period.</div>
+    </div>
+    <div class="country-card">
+      <div class="flag">🇬🇧</div><h3>UK</h3>
+      <div class="health quiet">Low</div>
+      <div class="kv"><span>Messages</span><span>8</span></div>
+      <div class="kv"><span>Active chatters</span><span>7</span></div>
+      <div class="top-name">Scattered, low engagement.</div>
+    </div>
+    <div class="country-card">
+      <div class="flag">🇺🇸</div><h3>USA</h3>
+      <div class="health ok">Most active</div>
+      <div class="kv"><span>Messages</span><span>26</span></div>
+      <div class="kv"><span>Active chatters</span><span>7</span></div>
+      <div class="top-name"><b>Top voices:</b> zurxee (8), 🕷 (8) — one member shared their 50% scholarship acceptance to University of St. Thomas.</div>
+    </div>
+  </div>
+
+  <div class="section-title">Main Topics Discussed</div>
+  <div class="panel">
+    <div class="topic-pills">
+      <div class="topic-pill">University of St. Thomas merit scholarship</div>
+      <div class="topic-pill">Canada visa preparation</div>
+      <div class="topic-pill">Transfer-student scholarship options</div>
+      <div class="topic-pill">Master's eligibility with lower GPA</div>
+    </div>
+  </div>
+
+  <div class="section-title">What people are actually talking about</div>
+  <div class="panel">
+    <p style="font-size:13.5px;line-height:1.7;margin:0;">
+      A genuinely useful thread ran across both USA and Canada — a member shared how they secured a 50% merit scholarship to University of St. Thomas, and several others asked for guidance on replicating it. Australia and Germany had zero activity this period.
+    </p>
+  </div>
+
+  <footer>Amber Community #1 · Internal weekly report · Data source: WhatsApp chat exports, 7 – 16 Sep 2026</footer>
+</div>
+
+<!-- PAGE 2: COMMUNITY #2 -->
+<div class="page" id="page-2">
+  <div class="hero">
+    <div>
+      <h1>Community #2 — Breakdown</h1>
+      <div class="range">7 – 16 September 2026 · 1,623 members</div>
+    </div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat"><div class="num">85</div><div class="lbl">Messages this period</div></div>
+    <div class="stat"><div class="num">30</div><div class="lbl">Unique active chatters</div></div>
+    <div class="stat"><div class="num">39</div><div class="lbl">Most active group: UK</div></div>
+    <div class="stat"><div class="num">2</div><div class="lbl">Quietest groups: Australia / Canada</div></div>
+  </div>
+
+  <div class="section-title">Messages by Group</div>
+  <div class="panel">
+    <div class="bars">
+      <div class="bar-row"><div>🇬🇧 UK</div><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><div class="bar-num">39</div></div>
+      <div class="bar-row"><div>🇩🇪 Germany</div><div class="bar-track"><div class="bar-fill grey" style="width:64%"></div></div><div class="bar-num">25</div></div>
+      <div class="bar-row"><div>🇺🇸 USA</div><div class="bar-track"><div class="bar-fill grey" style="width:44%"></div></div><div class="bar-num">17</div></div>
+      <div class="bar-row"><div>🇦🇺 Australia</div><div class="bar-track"><div class="bar-fill grey" style="width:5%"></div></div><div class="bar-num">2</div></div>
+      <div class="bar-row"><div>🇨🇦 Canada</div><div class="bar-track"><div class="bar-fill grey" style="width:5%"></div></div><div class="bar-num">2</div></div>
+    </div>
+  </div>
+
+  <div class="section-title">Group Snapshots</div>
+  <div class="grid5">
+    <div class="country-card">
+      <div class="flag">🇦🇺</div><h3>Australia</h3>
+      <div class="health quiet">Silent</div>
+      <div class="kv"><span>Messages</span><span>2</span></div>
+      <div class="kv"><span>Active chatters</span><span>2</span></div>
+      <div class="top-name">Two isolated messages.</div>
+    </div>
+    <div class="country-card">
+      <div class="flag">🇨🇦</div><h3>Canada</h3>
+      <div class="health quiet">Silent</div>
+      <div class="kv"><span>Messages</span><span>2</span></div>
+      <div class="kv"><span>Active chatters</span><span>2</span></div>
+      <div class="top-name">Two isolated messages.</div>
+    </div>
+    <div class="country-card">
+      <div class="flag">🇩🇪</div><h3>Germany</h3>
+      <div class="health ok">On-topic</div>
+      <div class="kv"><span>Messages</span><span>25</span></div>
+      <div class="kv"><span>Active chatters</span><span>8</span></div>
+      <div class="top-name"><b>Top voice:</b> Jawad (8) — BSN nursing scholarship (DAAD) questions, German language learning.</div>
+    </div>
+    <div class="country-card">
+      <div class="flag">🇬🇧</div><h3>UK</h3>
+      <div class="health ok">Most active</div>
+      <div class="kv"><span>Messages</span><span>39</span></div>
+      <div class="kv"><span>Active chatters</span><span>11</span></div>
+      <div class="top-name"><b>Top voice:</b> Abhavya~ Startup (16) — detailed fashion-program scholarship guidance (Manchester Met, UAL), UCAS application process explained.</div>
+    </div>
+    <div class="country-card">
+      <div class="flag">🇺🇸</div><h3>USA</h3>
+      <div class="health quiet">Low</div>
+      <div class="kv"><span>Messages</span><span>17</span></div>
+      <div class="kv"><span>Active chatters</span><span>7</span></div>
+      <div class="top-name">Spread across 7 people, general questions.</div>
+    </div>
+  </div>
+
+  <div class="section-title">Main Topics Discussed</div>
+  <div class="panel">
+    <div class="topic-pills">
+      <div class="topic-pill">Fashion program scholarships (Manchester Met, UAL)</div>
+      <div class="topic-pill">UCAS application process</div>
+      <div class="topic-pill">DAAD / BSN nursing scholarship (Germany)</div>
+      <div class="topic-pill">German language learning resources</div>
+    </div>
+  </div>
+
+  <div class="section-title">What people are actually talking about</div>
+  <div class="panel">
+    <p style="font-size:13.5px;line-height:1.7;margin:0;">
+      <b>UK</b> had the most substantive thread — a member walked another through the full UCAS-to-scholarship pipeline for fashion programs at Manchester Metropolitan and UAL, step by step. <b>Germany</b> covered whether BSN nursing scholarships exist for Pakistani students and where to start learning German.
+    </p>
+  </div>
+
+  <footer>Amber Community #2 · Internal weekly report · Data source: WhatsApp chat exports, 7 – 16 Sep 2026</footer>
+</div>
+
+<!-- PAGE 3: COMMUNITY #3 -->
+<div class="page" id="page-3">
+  <div class="hero">
+    <div>
+      <h1>Community #3 — Breakdown</h1>
+      <div class="range">7 – 16 September 2026 · 1,940 members</div>
+    </div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat"><div class="num">678</div><div class="lbl">Messages this period</div></div>
+    <div class="stat"><div class="num">120</div><div class="lbl">Unique active chatters</div></div>
+    <div class="stat"><div class="num">238</div><div class="lbl">Most active group: Australia</div></div>
+    <div class="stat"><div class="num">46</div><div class="lbl">Quietest group: Germany</div></div>
+  </div>
+
+  <div class="section-title">Messages by Group</div>
+  <div class="panel">
+    <div class="bars">
+      <div class="bar-row"><div>🇦🇺 Australia</div><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><div class="bar-num">238</div></div>
+      <div class="bar-row"><div>🇬🇧 UK</div><div class="bar-track"><div class="bar-fill grey" style="width:84%"></div></div><div class="bar-num">199</div></div>
+      <div class="bar-row"><div>🇺🇸 USA</div><div class="bar-track"><div class="bar-fill grey" style="width:60%"></div></div><div class="bar-num">143</div></div>
+      <div class="bar-row"><div>🇨🇦 Canada</div><div class="bar-track"><div class="bar-fill grey" style="width:22%"></div></div><div class="bar-num">52</div></div>
+      <div class="bar-row"><div>🇩🇪 Germany</div><div class="bar-track"><div class="bar-fill grey" style="width:19%"></div></div><div class="bar-num">46</div></div>
+    </div>
+  </div>
+
+  <div class="section-title">Group Snapshots</div>
+  <div class="grid5">
+    <div class="country-card">
+      <div class="flag">🇦🇺</div><h3>Australia</h3>
+      <div class="health ok">Most active</div>
+      <div class="kv"><span>Messages</span><span>238</span></div>
+      <div class="kv"><span>Active chatters</span><span>24</span></div>
+      <div class="top-name"><b>Top voices:</b> rohan (52), Aksh (35), Karan (35) — offer letter comparisons, tier-based university guidance, self-appointed "counselor" offering free advice.</div>
+    </div>
+    <div class="country-card">
+      <div class="flag">🇨🇦</div><h3>Canada</h3>
+      <div class="health ok">On-topic</div>
+      <div class="kv"><span>Messages</span><span>52</span></div>
+      <div class="kv"><span>Active chatters</span><span>12</span></div>
+      <div class="top-name"><b>Top voice:</b> Yuvraj Chouhan (16) — general admissions chat.</div>
+    </div>
+    <div class="country-card">
+      <div class="flag">🇩🇪</div><h3>Germany</h3>
+      <div class="health quiet">Low</div>
+      <div class="kv"><span>Messages</span><span>46</span></div>
+      <div class="kv"><span>Active chatters</span><span>21</span></div>
+      <div class="top-name">Spread across 21 people, scattered questions.</div>
+    </div>
+    <div class="country-card">
+      <div class="flag">🇬🇧</div><h3>UK</h3>
+      <div class="health ok">On-topic</div>
+      <div class="kv"><span>Messages</span><span>199</span></div>
+      <div class="kv"><span>Active chatters</span><span>31</span></div>
+      <div class="top-name"><b>Top voices:</b> Hemanth (74), Shashank Vs (51) — heavy wave of new-member introductions and scholarship questions from 15–17 year olds.</div>
+    </div>
+    <div class="country-card">
+      <div class="flag">🇺🇸</div><h3>USA</h3>
+      <div class="health ok">On-topic</div>
+      <div class="kv"><span>Messages</span><span>143</span></div>
+      <div class="kv"><span>Active chatters</span><span>32</span></div>
+      <div class="top-name"><b>Top voice:</b> rohan (27) — 11th-grade students bonding over shared Business Management ambitions.</div>
+    </div>
+  </div>
+
+  <div class="section-title">Main Topics Discussed</div>
+  <div class="panel">
+    <div class="topic-pills">
+      <div class="topic-pill">University tier/ranking guidance</div>
+      <div class="topic-pill">Offer letter comparisons (Birmingham, Coventry, UBC Okanagan)</div>
+      <div class="topic-pill">Need-based aid vs fully-funded scholarships</div>
+      <div class="topic-pill">New member introductions (largely 15-17 year olds)</div>
+      <div class="topic-pill">UK bachelor's suitability for Indian students</div>
+    </div>
+  </div>
+
+  <div class="section-title">What people are actually talking about</div>
+  <div class="panel">
+    <p style="font-size:13.5px;line-height:1.7;margin:0;">
+      <b>Australia</b> had a member (rohan) positioning himself as an informal free counselor, sharing university tier breakdowns and his own offer letters from Birmingham, Coventry, and UBC Okanagan — worth watching to make sure the advice given stays accurate. <b>UK</b> and <b>USA</b> both saw a large wave of very young (15-17) new members introducing themselves and asking foundational "is this country good for bachelor's" questions, suggesting this community is skewing younger than the others.
+    </p>
+  </div>
+
+  <footer>Amber Community #3 · Internal weekly report · Data source: WhatsApp chat exports, 7 – 16 Sep 2026</footer>
+</div>
+
+<!-- PAGE 4: COMMUNITY #4 -->
+<div class="page" id="page-4">
+  <div class="hero">
+    <div>
+      <h1>Community #4 — Breakdown</h1>
+      <div class="range">7 – 16 September 2026 · 356 members (new community, created 6 Sep)</div>
+    </div>
+  </div>
+
+  <div class="stat-row">
+    <div class="stat"><div class="num">470</div><div class="lbl">Messages this period</div></div>
+    <div class="stat"><div class="num">58</div><div class="lbl">Unique active chatters</div></div>
+    <div class="stat"><div class="num">218</div><div class="lbl">Most active group: USA</div></div>
+    <div class="stat"><div class="num">21</div><div class="lbl">Quietest group: Canada</div></div>
+  </div>
+
+  <div class="section-title">Messages by Group</div>
+  <div class="panel">
+    <div class="bars">
+      <div class="bar-row"><div>🇺🇸 USA</div><div class="bar-track"><div class="bar-fill" style="width:100%"></div></div><div class="bar-num">218</div></div>
+      <div class="bar-row"><div>🇦🇺 Australia</div><div class="bar-track"><div class="bar-fill grey" style="width:47%"></div></div><div class="bar-num">102</div></div>
+      <div class="bar-row"><div>🇬🇧 UK</div><div class="bar-track"><div class="bar-fill grey" style="width:38%"></div></div><div class="bar-num">83</div></div>
+      <div class="bar-row"><div>🇩🇪 Germany</div><div class="bar-track"><div class="bar-fill grey" style="width:21%"></div></div><div class="bar-num">46</div></div>
+      <div class="bar-row"><div>🇨🇦 Canada</div><div class="bar-track"><div class="bar-fill grey" style="width:10%"></div></div><div class="bar-num">21</div></div>
+    </div>
+  </div>
+
+  <div class="section-title">Group Snapshots</div>
+  <div class="grid5">
+    <div class="country-card">
+      <div class="flag">🇦🇺</div><h3>Australia</h3>
+      <div class="health ok">On-topic</div>
+      <div class="kv"><span>Messages</span><span>102</span></div>
+      <div class="kv"><span>Active chatters</span><span>12</span></div>
+      <div class="top-name"><b>Top voice:</b> MALAIKA RAZA ✨ (26) — UniMelb vs Monash scholarship comparison.</div>
+    </div>
+    <div class="country-card">
+      <div class="flag">🇨🇦</div><h3>Canada</h3>
+      <div class="health quiet">Low</div>
+      <div class="kv"><span>Messages</span><span>21</span></div>
+      <div class="kv"><span>Active chatters</span><span>7</span></div>
+      <div class="top-name"><b>Top voice:</b> Doja (11) — introductions.</div>
+    </div>
+    <div class="country-card">
+      <div class="flag">🇩🇪</div><h3>Germany</h3>
+      <div class="health ok">On-topic</div>
+      <div class="kv"><span>Messages</span><span>46</span></div>
+      <div class="kv"><span>Active chatters</span><span>11</span></div>
+      <div class="top-name"><b>Top voices:</b> Avviii👾 (16), Goodness And Mercy 🙏🙏 (16).</div>
+    </div>
+    <div class="country-card">
+      <div class="flag">🇬🇧</div><h3>UK</h3>
+      <div class="health ok">On-topic</div>
+      <div class="kv"><span>Messages</span><span>83</span></div>
+      <div class="kv"><span>Active chatters</span><span>12</span></div>
+      <div class="top-name">Members offering to personally ask their own universities about scholarships for others — strong early peer-help culture.</div>
+    </div>
+    <div class="country-card">
+      <div class="flag">🇺🇸</div><h3>USA</h3>
+      <div class="health ok">Most active</div>
+      <div class="kv"><span>Messages</span><span>218</span></div>
+      <div class="kv"><span>Active chatters</span><span>16</span></div>
+      <div class="top-name"><b>Top voices:</b> Doja (66), C (44), Har Har Mahadev ❤️ (32) — introductions and scholarship guidance for software engineering students.</div>
+    </div>
+  </div>
+
+  <div class="section-title">Main Topics Discussed</div>
+  <div class="panel">
+    <div class="topic-pills">
+      <div class="topic-pill">UniMelb vs Monash scholarship comparison</div>
+      <div class="topic-pill">Software engineering master's scholarships</div>
+      <div class="topic-pill">Peer-to-peer scholarship lookup offers</div>
+      <div class="topic-pill">New member introductions (heavy)</div>
+      <div class="topic-pill">IELTS-free application options</div>
+      <div class="topic-pill">Financial hardship deferral (UK)</div>
+    </div>
+  </div>
+
+  <div class="section-title">What people are actually talking about</div>
+  <div class="panel">
+    <p style="font-size:13.5px;line-height:1.7;margin:0;">
+      For a community that's only 10 days old, the culture is off to a strong start — in <b>UK</b>, a member proactively offered to personally ask her own university's admissions office about scholarship options for someone else. <b>Australia</b> had a genuine, detailed UniMelb-vs-Monash funding comparison. <b>USA</b> saw the most volume, dominated by introductions and software-engineering scholarship questions. This is the pattern worth nurturing as the community grows.
+    </p>
+  </div>
+
+  <footer>Amber Community #4 · Internal weekly report · Data source: WhatsApp chat exports, 7 – 16 Sep 2026</footer>
+</div>
+
+<script>
+function showPage(i, btn){
+  document.querySelectorAll('.page').forEach((p,idx)=>p.classList.toggle('active', idx===i));
+  document.querySelectorAll('.nav button').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  window.scrollTo(0,0);
+}
+</script>
+
+</body>
+</html>
